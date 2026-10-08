@@ -17,4 +17,4 @@ Telegram bot that provides auction features via telegram interface
 1. dowload or restore databse as `./data_base/sql_app.db`
 1. `docker-compose up -d --build`
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/YOUR_USERNAME/YOUR_REPO)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Yewsdhi/telegram_auction_sexi)
