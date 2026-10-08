@@ -1,8 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
-from dateutil.relativedelta import relativedelta
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AuctionItemBase(BaseModel):
@@ -12,46 +11,37 @@ class AuctionItemBase(BaseModel):
     is_start_price: bool
     photo: str
     owner_id: int
-    start_date: datetime = datetime.now()
-    end_date: datetime = datetime.now() + relativedelta(years=1)
+    start_date: datetime = Field(default_factory=datetime.now)
+    end_date: datetime = Field(default_factory=lambda: datetime.now() + timedelta(days=365))
 
 
 class AuctionItemCreate(AuctionItemBase):
-    """Create item from API data and save it to database"""
-
     is_start_price: bool = True
 
 
 class AuctionItemRead(AuctionItemBase):
-    """Read item from database"""
-
     id: int
     is_sold: bool
-    end_date: datetime
 
     class Config:
         orm_mode = True
 
 
 class AuctionItemUpdateReq(BaseModel):
-    title: Optional[str]
-    description: Optional[str]
-    price: Optional[float]
-    is_start_price: Optional[bool] = False
-    owner_id: Optional[float]
-    is_sold: Optional[bool] = False
-    end_date: Optional[datetime]
+    title: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    is_start_price: Optional[bool] = None
+    owner_id: Optional[int] = None
+    is_sold: Optional[bool] = None
+    end_date: Optional[datetime] = None
 
 
 class AuctionUserCreate(BaseModel):
-    """Create user from API data and save it to database"""
-
     username: str
 
 
 class AuctionUserRead(BaseModel):
-    """Read user from database"""
-
     id: int
     username: str
     items: list[AuctionItemRead] = []

@@ -48,20 +48,14 @@ def update_item_by_id(
         is_sold=models.AuctionItem.is_sold,
         end_date=models.AuctionItem.end_date,
     )
-    _ = (
-        db.query(models.AuctionItem)
-        .filter_by(id=item_id)
-        .update(
-            # validate data
-            schemas.AuctionItemUpdate(
-                **dict(
-                    # merge 2 dicts w/ default data and updated data
-                    defalut_dict,
-                    **upd_dict
-                )
-            ).model_dump()
-        )
+    update_model = schemas.AuctionItemUpdate(
+        **dict(defalut_dict, **upd_dict)
     )
+    update_data = update_model.dict(
+        exclude_unset=True,
+        exclude_none=True,
+    )
+    db.query(models.AuctionItem).filter_by(id=item_id).update(update_data)
     db.commit()
 
     return db.query(models.AuctionItem).get(item_id)
@@ -87,23 +81,21 @@ def update_item_by_title(
         is_sold=models.AuctionItem.is_sold,
         end_date=models.AuctionItem.end_date,
     )
-    db_item = (
-        db.query(models.AuctionItem)
-        .filter_by(title=item.title)
-        .update(
-            # validate data
-            models.AuctionItemUpdate(
-                **dict(
-                    # merge 2 dicts w/ default data and updated data
-                    defalut_dict,
-                    **upd_dict
-                )
-            ).dict()
-        )
-    )
+    db_query = db.query(models.AuctionItem).filter_by(title=item.title)
+    existing = db_query.first()
+    if existing is None:
+        return None
+
+    for key, value in upd_dict.items():
+        if key != "title":
+            setattr(existing, key, value)
+
+    if price_increment is not None:
+        existing.price = (existing.price or 0) + price_increment
 
     db.commit()
-    return db_item
+    db.refresh(existing)
+    return existing
 
 
 # delete item by id
